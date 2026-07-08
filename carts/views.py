@@ -80,18 +80,9 @@ def add_cart(request, product_id):
                 except:
                     pass
 
-
-        try:
-            cart = Cart.objects.get(cart_id=_cart_id(request)) # get the cart using the cart_id present in the session
-        except Cart.DoesNotExist:
-            cart = Cart.objects.create(
-                cart_id = _cart_id(request)
-            )
-        cart.save()
-
-        is_cart_item_exists = CartItem.objects.filter(product=product, cart=cart).exists()
+        is_cart_item_exists = CartItem.objects.filter(product=product, user=current_user).exists()
         if is_cart_item_exists:
-            cart_item = CartItem.objects.filter(product=product, cart=cart)
+            cart_item = CartItem.objects.filter(product=product, user=current_user)
             # existing_variations -> database
             # current variation -> product_variation
             # item_id -> database
@@ -102,7 +93,7 @@ def add_cart(request, product_id):
                 ex_var_list.append(list(existing_variation))
                 id.append(item.id)
 
-            print(ex_var_list)
+            # print(ex_var_list)
 
             if product_variation in ex_var_list:
                 # increase the cart item quantity
@@ -113,7 +104,7 @@ def add_cart(request, product_id):
                 item.save()
 
             else:
-                item = CartItem.objects.create(product=product, quantity=1, cart=cart)
+                item = CartItem.objects.create(product=product, quantity=1, user=current_user)
                 if len(product_variation) > 0:
                     item.variations.clear()
                     item.variations.add(*product_variation)
@@ -122,7 +113,7 @@ def add_cart(request, product_id):
             cart_item = CartItem.objects.create(
                 product = product,
                 quantity = 1,
-                cart = cart,
+                 user=current_user,
             )
             if len(product_variation) > 0:
                 cart_item.variations.clear()
